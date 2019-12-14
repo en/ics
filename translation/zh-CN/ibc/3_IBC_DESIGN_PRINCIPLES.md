@@ -4,7 +4,7 @@
 
 **有关IBC规范中使用的术语的定义，请参见[此处](./1_IBC_TERMINOLOGY.md) 。**
 
-**For an architectural overview, see [here](./2_IBC_ARCHITECTURE.md).**
+**有关架构的概述，请参见[此处](./2_IBC_ARCHITECTURE.md) 。**
 
 **有关一组示例用例，请参见[此处](./4_IBC_USECASES.md) 。**
 
@@ -12,46 +12,46 @@
 
 “区块链间通信协议”的设计空间很广，这个术语本身变得太包罗万象了。 “区块链间通信协议”（IBC）是该设计空间中的一个非常特殊的点，它被选择为预期的可互操作区块链的链间生态系统提供特定的多功能性，局部性，模块化和效率属性。本文档概述了IBC的“原因”，并列举了主要的高级设计目标。
 
-## Versatility
+## 多样性
 
-IBC is designed to be a *versatile* protocol. The protocol supports *heterogeneous* blockchains whose state machines implement different semantics in different languages. Applications written on top of IBC can be *composed* together, and IBC protocol steps themselves can be *automated*.
+IBC被设计为*多样性*协议。该协议支持*异构*区块链，其状态机用不同的语言实现了不同的语义。可以将在IBC之上编写的应用程序*组合*在一起，并且使用IBC协议进行*自动化* 。
 
-### Heterogeneity
+### 异构性
 
-IBC can be implemented by any consensus algorithm and state machine with a basic set of requirements (fast finality, constant-size state commitments, and succinct commitment proofs). The protocol handles data authentication, transport, and ordering — common requirements of any multi-chain application — but is agnostic to the semantics of the application itself. Heterogeneous chains connected over IBC must understand a compatible application-layer "interface" (such as for transferring tokens), but once across the IBC interface handler, the state machines can support arbitrary bespoke functionality (such as shielded transactions).
+IBC可以通过任何满足基本需求集的共识算法和状态机来实现（快速最终性，常量大小的状态加密承诺和简洁的加密承诺证明）。该协议处理数据身份验证，传输和排序（任何多链应用程序的常见要求），但与应用程序本身的语义无关。通过IBC连接的异构链必须了解兼容的应用程序层“接口”（例如，用于转移通证），但是一旦通过IBC接口处理程序，状态机就可以支持任意定制的功能（例如，受保护的交易）。
 
 ### 可组合性
 
-Applications written on top of IBC can be composed together by both protocol developers and users. IBC defines a set of primitives for authentication, transport, and ordering, and a set of application-layer standards for asset & data semantics. Chains which support compatible standards can be connected together and transacted between by any user who elects to open a connection (or reuse a connection), and assets & data can be relayed across multiple chains both automatically ("multi-hop") and manually (by sending several IBC relay transactions in sequence).
+协议开发人员和用户都可以将在IBC之上编写的应用程序组合在一起。 IBC定义了一组用于身份验证，传输和排序的原语，以及一组用于资产和数据语义的应用层标准。支持兼容标准的链可以连接在一起并和任何打开连接（或重用连接）的用户进行交互，资产和数据可以跨多个链自动（“多跳”）和手动（通过依次发送几个IBC中继交易）中继。
 
 ### 自动化性
 
-The "users", or "actors", in IBC — who initiate connections, create channels, send packets, report Byzantine fraud, etc. — may be, but need not be, human. Modules, smart contracts, and automated off-chain processes can make use of the protocol (subject to e.g. gas costs to charge for computation) and take actions on their own or in concert. Complex interactions across multiple chains (such as the three-step connection opening handshake or multi-hop token transfers) are designed such that all but the single initiating action can be abstracted away from the user. Eventually, it may be possible to automatically spin up a new blockchain (modulo physical infrastructure provisioning), start IBC connections, and make use of the new chain's state machine & throughput entirely automatically.
+IBC中的“用户”或“参与者”（可以启动连接，创建通道，发送数据包，报告拜占庭欺诈等）可以是但不是必须是人类，模块，智能合约和自动化的链下进程可以利用该协议（例如，要支付用于计算的gas费用成本），并可以自行采取行动或协同行动。设计跨多个链的复杂交互（例如三步连接打开握手或多跳通证转移），使得除了单个启动动作之外的所有动作都可以从用户那里抽象出来。最终，可能有可能自动启动一个新的区块链（抛开配置物理基础架构），启动IBC连接，并完全自动使用新链的状态机和吞吐量。
 
 ## 模块化
 
-IBC is designed to be a *modular* protocol. The protocol is constructed as a series of layered components with explicit security properties & requirements. Implementations of a component at a particular layer can vary (such as a different consensus algorithm or connection opening procedure) as long as they provide the requisite properties to the higher layers (such as finality, < 1/3 Byzantine safety, or embedded trusted states on two chains). State machines need only understand compatible subsets of the IBC protocol (e.g. lite client verification algorithms for each other's consensus) in order to safely interact.
+IBC被设计为*模块化*协议。该协议被构造为一系列具有明确安全属性和要求的分层组件。特定层上组件的实现可以有所不同（例如不同的共识算法或连接打开过程），只要它们为更高层提供必要的属性（例如最终性，<1/3拜占庭安全性或嵌入式受信任状态在两个链上）。状态机仅需要了解IBC协议的兼容子集（例如，用于彼此共识的轻客户端验证算法）即可安全地进行交互。
 
-## Locality
+## 局部性
 
-IBC is designed to be a *local* protocol, meaning that only information about the two connected chains is necessary to reason about the security and correctness of a bidirectional IBC connection. Security requirements of the authentication primitives refer only to consensus algorithms and validator sets of the blockchains involved in the connection, and a blockchains maintaining a set of IBC connections need only understand the state of the chains to which it is connected (no matter which other chains those chains are connected to).
+IBC被设计为*局部*协议，这意味着仅两个连接链的信息关系着双向IBC连接的安全性和正确性。身份验证原语的安全性要求仅涉及连接中的区块链的共识算法和验证人集合，并且维护一组IBC连接的区块链仅需要了解其所连接的链的状态（无论这些链又连接到哪个链）。
 
-### Locality of communication & information
+### 通讯和信息的局部性
 
-IBC makes no assumptions, and relies upon no characteristics, of the topological structure of the network of blockchains in which it is operating. No view of the global network-of-blockchains topology is required: security & correctness can be reasoned about at the level of a single connection between two chains, and by composition reasoned about for sub-graphs in the network topology. Users and chains can reason about their assumptions and risks given information about only part of the network graph of blockchains they know and assume to be correct (to variable degrees).
+IBC对其运行所在的区块链网络的拓扑结构不做任何假设，也不依赖任何特征。无需查看全局的区块链网络拓扑：可以在两条链之间的单个连接级别上推理安全性和正确性，并可以通过对网络拓扑中的子图进行推理来推理安全性和正确性。给定用户仅知道和假定正确的区块链网络图的一部分信息（可变程度），用户和链就可以推断其假设和风险。
 
-There is no necessary "root chain" in IBC — some sub-graphs of the global network may evolve into a hub-spoke structure, others may remain tightly connected, others still may take on more exotic topologies. Channels are end-to-end; in the first version IBC will only support one-hop paths, but multi-hop paths will be supported in the future (though automatic routing is not necessarily likely or safe due to the consensus algorithm correctness assumptions involved).
+IBC中没有必需的“根链”-全球网络的某些子图可能会演变成中心辐射状结构，其他子图可能保持紧密连接，其他子图可能仍采用更奇特的拓扑。通道是端到端的；在第一个版本中，IBC仅支持单跳路径，但将来将支持多跳路径（尽管由于涉及共识算法正确性假设，因此自动路由不一定可能或安全）。
 
-Application data, however, may have salient non-local properties which users of the protocol will need to pay attention to, such as the original source zone of a token which might have been sent on a complex multi-hop path, the original stake & identity of a validator offering their services through cross-chain validation, or the original smart contract with which a particular object-capability key managing a non-fungible token is associated. These non-local properties do not need to be understood by the IBC protocol itself, but they will need to be reasoned about by users and higher-level applications.
+但是，应用程序数据可能具有协议用户需要注意的显著的非局部属性，例如通证的原始来源区域（可能已在复杂的多跳路径上发送了多次），原始权益和通过跨链验证提供其服务的验证人的身份，或与管理非同质化通证的特定对象功能密钥相关联的原始智能合约。这些非局部属性不需要由IBC协议本身理解，但需要由用户和更高级别的应用程序来推断。
 
 ### 正确性假设和安全性的局部性
 
-Users of IBC — at the blockchain level and at the human or smart contract level — choose which consensus algorithms, state machines, and validator sets they "assume to be correct" (to behave in a particular way, e.g. < 1/3 Byzantine) and in which ways they assume correctness. Assuming the IBC protocol is implemented correctly, users are never exposed to risks of application-level invariant violations (such as asset inflation) due to Byzantine behaviour or faulty state machines transitions committed by validator sets or blockchains they did not explicitly decide to assume to be correct. This is particularly important in the expected large network topology of interconnected blockchains, where some number of blockchains and validator sets can be expected to be Byzantine occasionally — IBC, implemented conservatively, bounds the risk and limits the possible damage incurred.
+IBC的用户（在区块链级别以及在人类或智能合约级别上）选择哪些共识算法，状态机和验证人集合为“假定正确”（以特定方式运行，例如<1/3拜占庭）并以哪种方式假设正确性。假设IBC协议正确实施，则用户永远不会因拜占庭行为或验证人集合或未明确决定假定为验证人的区块链提交的错误状态机转换而遭受应用级不变违规（例如资产通涨）的风险。这在互连的区块链的预期大型网络拓扑中尤为重要，在这种拓扑中，一些区块链和验证人集合有时可能会有意的进行拜占庭行为— IBC保守的实施，限制了风险并限制了可能造成的损害。
 
-### Locality of permissioning
+### 许可的局部性
 
-Actions in IBC — such as opening a connection, creating a channel, or sending a packet — are permissioned locally by the state machines and actors involved in a particular connection between two chains. Individual chains could choose to require approval from a permissioning mechanism (such as governance) for specific application-layer actions (such as delegated-security slashing), but for the base protocol, actions are permissionless (modulo gas & storage costs) — by default, connections can be opened, channels created, and packets sent without any approval process. Of course, users themselves must inspect the state & consensus of each IBC connection and decide whether it is safe to used (based e.g. on the trusted states stored).
+涉及两条链之间特定连接的状态机和参与者在本地许可IBC中的操作（例如打开连接，创建通道或发送数据包）。各个链可以选择要求特定应用程序层操作（例如，委托安全性惩罚）的许可机制（例如，治理）的批准，但是对于基本协议，操作是无许可的（抛开gas费用和存储成本）-默认情况下，无需任何批准即可打开连接，创建通道和发送数据包。当然，用户自己必须检查每个IBC连接的状态和共识，并决定使用它是否安全（例如，基于存储的受信任状态）。
 
-## Efficiency
+## 高效性
 
-IBC is designed to be an *efficient* protocol: the amortised cost of interchain data & asset relay should be mostly comprised of the cost of the underlying state transitions or operations associated with packets (such as transferring tokens), plus some small constant overhead.
+IBC被设计为一种*高效的*协议：链间数据和资产中继的平摊成本应主要包括基础状态转换或与数据包相关的操作（例如，转移通证）的成本，以及一些较小的固定开销。
