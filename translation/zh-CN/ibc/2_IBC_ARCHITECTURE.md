@@ -1,30 +1,30 @@
-# 2: Inter-blockchain Communication Protocol Architecture
+# 2：区块链间通信协议架构
 
 **这是IBC协议的高层次体系结构和数据流的概述。**
 
-**For definitions of terms used in IBC specifications, see [here](./1_IBC_TERMINOLOGY.md).**
+**有关IBC规范中使用的术语的定义，请参见[此处](./1_IBC_TERMINOLOGY.md) 。**
 
-**For a broad set of protocol design principles, see [here](./3_IBC_DESIGN_PRINCIPLES.md).**
+**有关广泛的协议设计原则，请参见[此处](./3_IBC_DESIGN_PRINCIPLES.md) 。**
 
-**For a set of example use cases, see [here](./4_IBC_USECASES.md).**
+**有关一组示例用例，请参见[此处](./4_IBC_USECASES.md) 。**
 
-**For a discussion of design patterns, see [here](./5_IBC_DESIGN_PATTERNS.md).**
+**有关设计模式的讨论，请参见[此处](./5_IBC_DESIGN_PATTERNS.md) 。**
 
 本文档概述了区块链间通信协议（IBC）栈的身份验证，传输和排序层的体系结构。本文档没有描述特定的协议详细信息-它们包含在各个ICS中。
 
 > 注意： *账本* ， *链*和*区块链*根据其通俗用法在本文档中可互换使用。
 
-## What is IBC?
+## 什么是IBC？
 
 *区块链间通信协议*是一种可靠且安全的模块间通信协议，其中模块是在独立机器上运行的确定性进程，包括多副本状态机（例如“区块链”或“分布式账本”）。
 
 任何基于可靠和安全的模块间通信的应用程序都可以使用IBC。示例应用程序包括跨链资产转移，原子交换，多链智能合约（不论是否拥有相互可理解的虚拟机）以及各种数据和代码分片应用。
 
-## What is IBC not?
+## IBC不是什么？
 
 IBC不是应用层协议：它仅处理数据传输，身份验证和可靠性。
 
-IBC is not an atomic-swap protocol: arbitrary cross-chain data transfer and computation is supported.
+IBC不是原子交换协议：支持任意跨链数据传输和计算。
 
 IBC不是通证转移协议：通证转移是IBC协议上的一种可能的应用层场景。
 
@@ -32,7 +32,7 @@ IBC不是分片协议：不存在单个状态机被拆分成链，而是在不�
 
 IBC不是二层扩容协议：所有实现IBC的链都存在于同一“层”上，尽管它们可能位据网络拓扑中的不同位置，但唯一的根链或唯一的验证人集合不是必须的。
 
-## Motivation
+## 动机
 
 在撰写本文时，两个主要的区块链，比特币和以太坊目前分别支持每秒约7和约20笔交易。尽管主要用户群还是那些早期采用者，两者在最近的几年中一直处于满负荷状态运行。吞吐量是大多数区块链使用场景的限制，而吞吐量根本上受限于分布式状态机，因为网络中的每个（验证）节点都必须处理每笔交易（抛开未来基于零知识的结构，这目前超出了范围） ，存储所有状态，并与其他验证节点通信。更快的共识算法（例如[Tendermint](https://github.com/tendermint/tendermint) ）或许可以将吞吐量提高一个很大的常数因子，但是由于这个原因将无法无限扩展。为了支持促进分布式账本应用程序的广泛部署所需的交易吞吐量，应用程序多样性和成本效率，必须同时运行多个独立的共识实例，并拆分之间的执行和存储。
 
@@ -46,19 +46,19 @@ IBC不是二层扩容协议：所有实现IBC的链都存在于同一“层”�
 
 IBC是一种端到端，面向连接的状态协议，用于在独立计算机上的模块之间进行可靠的，可选的有序身份认证的通信。预计IBC实现将与主机状态机上的更高级别的模块和协议共存。承载IBC的状态机必须提供一组特定的功能来进行共识记录验证和加密承诺证明生成，并且IBC数据包中继器（链下过程）应能够访问网络协议和物理数据链接，以读取一台机器的状态，然后将数据提交给另一台机器。
 
-## Scope
+## 范围
 
-IBC handles authentication, transport, and ordering of structured data packets relayed between modules on separate machines. The protocol is defined between modules on two machines, but designed for safe simultaneous use between any number of modules on any number of machines connected in arbitrarily topologies.
+IBC处理在独立计算机上的模块之间中继的结构化数据包的身份验证，传输和排序。该协议是在两台计算机上的模块之间定义的，但设计用于在以任意拓扑连接的任意数量的计算机上的任意数量的模块之间安全地同时使用。
 
 ## 接口
 
 IBC位于模块-智能合约，其他状态机组件或状态机上其他独立的应用程序逻辑部分，和基础共识协议，机器和网络基础结构（例如TCP / IP）之间。
 
-IBC provides to modules a set of functions much like the functions which might be provided to a module for interacting with another module on the same state machine: sending data packets and receiving data packets on an established connection & channel (primitives for authentication & ordering, see [definitions](./1_IBC_TERMINOLOGY.md)) — in addition to calls to manage the protocol state: opening and closing connections and channels, choosing connection, channel, and packet delivery options, and inspecting connection & channel status.
+IBC为模块提供了一组功能，类似于为与同一状态机上的另一个模块进行交互的模块可能提供的功能：在已建立的连接和通道上发送数据包和接收数据包（用于身份验证和排序的原语，请参阅[定义](./1_IBC_TERMINOLOGY.md) ）-除了用于管理协议状态的调用之外：打开和关闭连接和通道，选择连接，通道和数据包传递选项以及检查连接和通道状态。
 
 IBC假定[ICS 2中](../../spec/ics-002-client-semantics)定义的基础共识协议和机器的功能和特性，主要是最终性（或阈值最终性小工具），可廉价验证的共识记录和简单的键/值存储功能。在网络方面，IBC仅需要最终的数据传递-不假定身份验证，同步或有序属性（这些属性将在稍后精确定义）。
 
-### Protocol relations
+### 协议关系
 
 ```
 +------------------------------+                           +------------------------------+
@@ -74,22 +74,22 @@ IBC假定[ICS 2中](../../spec/ics-002-client-semantics)定义的基础共识协
 +------------------------------+                           +------------------------------+
 ```
 
-## Operation
+## 运作方式
 
 IBC的主要目的是在独立主机上运行的模块之间提供可靠的，经过身份认证的有序通信。这需要以下领域的协议逻辑：
 
-- Data relay
+- 数据中继
 - 数据机密性和易读性
-- Reliability
+- 可靠性
 - 流控
 - 身份验证
-- Statefulness
-- Multiplexing
-- Serialisation
+- 有状态
+- 多路复用
+- 序列化
 
-The following paragraphs outline the protocol logic within IBC for each area.
+以下各段概述了IBC中每个区域的协议逻辑。
 
-### Data relay
+### 数据中继
 
 在IBC体系结构中，模块不是通过网络基础结构直接向彼此发送消息，而是创建要发送的消息，然后通过负责监视的“中继器进程”对消息进行物理中继。 IBC假定存在一组中继器进程，这些中继器进程可以访问基础网络协议堆栈（可能是TCP / IP，UDP / IP或QUIC / IP）和物理互连基础结构。这些中继器进程监视一组实现IBC协议的机器，连续扫描每台机器的状态，并在提交传出数据包时在另一台机器上执行交易。为了正确操作并在两台机器之间建立连接的过程，IBC仅要求至少存在一个可以在机器之间进行中继的正确且活跃的中继器进程。
 
@@ -97,7 +97,7 @@ The following paragraphs outline the protocol logic within IBC for each area.
 
 IBC协议仅要求可以正确操作IBC协议所需的最少数据，使之可用且易读（以标准格式序列化），并且状态机可以选择使该数据仅对特定中继器可用（但这里的细节超出本规范的范围）。此数据包括共识状态，客户端，连接，通道和数据包信息，以及构造状态中特定键/值对的包含或不包含证明所必需的任何辅助状态结构。所有必须证明给另一台机器的数据也必须易读；即必须以本规范定义的格式序列化。
 
-### Reliability
+### 可靠性
 
 网络层和中继器进程可能以任意方式运行，丢弃，乱序或发送重复数据包，故意尝试发送非法交易或其他拜占庭错误方式操作。这一定不能损害IBC的安全性和活性。这是通过为通过IBC连接（在发送时）发送的每个数据包分配一个序号来实现的，该序号由接收机上的IBC处理模块（实现IBC协议的状态机部分）检查并提供一种发送机在发送更多数据包或采取进一步措施之前检查接收计算机实际上是否已接收并处理了数据包的方法。加密承诺用于防止数据报伪造：发送方机器承诺传出数据包，而接收方计算机检查这些加密承诺，因此中继器在传输过程中更改的数据报将被拒绝。 IBC还支持无序通道，该通道不强制执行相对于发送的数据包接收顺序，但仍强制执行仅一次可达。
 
@@ -113,17 +113,17 @@ IBC中的所有数据报都经过了身份验证：由发送机的共识算法�
 
 如上所述，可靠性，流控和身份验证要求IBC初始化并维护每个数据流的某些状态信息。此信息分为两个抽象：连接和通道。每个连接对象都包含有关已连接计算机的共识状态的信息。特定于一对模块的每个通道都包含有关协商的编码和多路复用选项以及状态和序号的信息。当两个模块希望进行通信时，它们必须在其两台机器之间找到一个现有的连接和通道，或者如果不存在则初始化一个新的连接和通道。初始化连接和通道需要多步握手，一旦完成，就确保在连接的情况下仅连接了两个目标机器，并确保连接了两个模块，并确保对将来的数据报进行身份验证，编码，对于通道，还需要保证排序。
 
-### Multiplexing
+### 多路复用
 
 为了允许单个主机中的许多模块同时使用IBC连接，IBC在每个连接中提供了一组通道，每个通道的数据流拥有唯一标识，所以数据包可以按顺序发送（在有序的情况下） ，并且接收方机器上始终保持近一次可达。通常希望通道与每台机器上的单个模块关联，但是一对多和多对一的通道也是可能的。通道的数量是无限的，这有助于并发吞吐量仅受底层计算机的吞吐量限制，而仅需一个连接即可跟踪共识信息（因此，使用该连接在所有通道上分摊共识记录验证成本）。
 
-### Serialisation
+### 序列化
 
 IBC充当了彼此无法理解的机器之间的接口边界，并且必须提供必要的最少的数据结构编码和数据报格式集，以允许两台都正确实现协议的机器相互理解。为此，IBC规范在此仓库中定义了以proto3格式提供的数据结构的规范编码，必须在通过IBC进行通信的两台机器之间进行序列化，中继或证明检查。
 
 > 请注意，proto3的一个子集提供了典范的编码（相同的结构始终序列化为相同的字节）。因此，禁止使用map和未知字段。
 
-## Dataflow
+## 数据流
 
 IBC可以概念化为分层协议栈，数据从上到下（在发送IBC数据包时）或自下而上（在接收IBC数据包时）经过协议栈。
 
@@ -131,7 +131,7 @@ IBC可以概念化为分层协议栈，数据从上到下（在发送IBC数据�
 
 考虑两条链*A*和*B* 之间的IBC数据包的路径：
 
-### Diagram
+### 图表
 
 ```
 +---------------------------------------------------------------------------------------------+
