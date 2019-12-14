@@ -2,7 +2,7 @@
 
 **这是IBC规范中使用的术语的概述。**
 
-**For an architectural overview, see [here](./2_IBC_ARCHITECTURE.md).**
+**有关架构的概述，请参见[此处](./2_IBC_ARCHITECTURE.md) 。**
 
 **有关广泛的协议设计原则，请参见[此处](./3_IBC_DESIGN_PRINCIPLES.md) 。**
 
@@ -14,141 +14,141 @@
 
 ## 抽象定义
 
-### Actor
+### 参与者
 
-An *actor*, or a *user* (used interchangeably), is an entity interacting with the IBC protocol. An actor can be a human end-user, a module or smart contract running on a blockchain, or an off-chain relayer process capable of signing transactions.
+*参与者*或*用户* （可互换使用）是使用IBC协议进行交互的实体。参与者可以是一个人类最终用户，在区块链上运行的模块或智能合约，或者是能够签名交易的链下中继器进程。
 
 ### 机器/链/账本
 
-A *machine*, *chain*, *blockchain*, or *ledger* (used interchangeably), is a state machine (which may be a distributed ledger, or "blockchain", although a strict chain of blocks may not be required) implementing part or all of the IBC specification.
+*机器* ， *链* ， *区块链*或*账本* （可互换使用）是一种状态机（可以是一个分布式账本或“区块链”，尽管可能不需要是一条严格的由块组成的链），它实现了部分或全部的IBC规范。
 
-### Relayer process
+### 中继器进程
 
-A *relayer process* is an off-chain process responsible for relaying IBC packet data & metadata between two or more machines by scanning their states & submitting transactions.
+中继器*进程*是一个链下进程，负责通过扫描两个或更多机器的状态并提交交易来在它们之间中继IBC数据包和元数据。
 
 ### 状态机
 
-The *state machine* of a particular chain defines the structure of the state as well as the set of rules which determines valid transactions that trigger state-transitions based on the current state agreed upon by the consensus algorithm of the chain.
+特定链的*状态机*定义状态的数据结构以及一组规则，这些规则决定了合法的交易可以在基于链的共识算法所达成一致的当前状态上触发状态转换。
 
 ### 共识
 
-A *consensus* algorithm is the protocol used by the set of processes operating a distributed ledger to come to agreement on the same state, generally under the presence of a bounded number of Byzantine faults.
+*共识*算法是一组操作分布式账本的进程所使用的协议，通常在存在一定数量的拜占庭错误的情况下就同一状态达成一致。
 
 ### 共识状态
 
-The *consensus state* is the set of information about the state of a consensus algorithm required to verify proofs about the output of that consensus algorithm (e.g. commitment roots in signed headers).
+*共识状态*是一组关于共识算法状态的信息集，它可以用来验证该共识算法输出的结果（例如，签名区块头中的加密承诺根）。
 
-### Commitment
+### 加密承诺
 
-A cryptographic *commitment* is a way to cheaply verify membership or non-membership of a key/value pair in a mapping, where the mapping can be committed to with a short witness string.
+加密*承诺*是一种可以廉价的验证成员是否存在于键/值映射的方法，映射中可以附带提交一个简短的见证字符串。
 
-### Header
+### 区块头
 
-A *header* is an update to the consensus state of a particular blockchain, including a commitment to the current state, that can be verified in a well-defined fashion by a "light client" algorithm.
+*区块头*是对特定区块链共识状态的更新，包含当前状态的加密承诺，并可以通过“轻客户端”算法以明确定义的方式进行验证。
 
-### CommitmentProof
+### 加密承诺证明
 
-A *commitment proof* is the proof structure which proves whether a particular key maps to a particular value in a committed-to set or not.
+*加密承诺证明*是一种证明结构，用于证明特定键是否映射到加密承诺集中的特定值。
 
-### Handler Module
+### 处理模块
 
-The IBC *handler module* is the module within the state machine which implements [ICS 25](../spec/ics-025-handler-module), managing clients, connections, & channels, verifying proofs, and storing appropriate commitments for packets.
+IBC *处理模块*是状态机中实现了[ICS 25](../spec/ics-025-handler-module)的模块 ，它管理客户端，连接和通道，验证证明并存储数据包的加密承诺。
 
 ### 路由模块
 
-The IBC *routing module* is the module within the state machine which implements [ICS 26](../spec/ics-026-routing-module), routing packets between the handler module and other modules on the host state machine which utilise the routing module's external interface.
+IBC *路由模块*是状态机中实现了[ICS 26](../spec/ics-026-routing-module)的模块 ，它在使用路由模块的外部接口的主机状态机内路由处理模块和其他模块之间的数据包。
 
 ### 数据报
 
-A *datagram* is an opaque bytestring transmitted over some physical network, and handled by the IBC routing module implemented in the ledger's state machine. In some implementations, the datagram may be a field in a ledger-specific transaction or message data structure which also contains other information (e.g. a fee for spam prevention, nonce for replay prevention, type identifier to route to the IBC handler, etc.). All IBC sub-protocols (such as opening a connection, creating a channel, sending a packet) are defined in terms of sets of datagrams and protocols for handling them through the routing module.
+*数据报*是在某个物理网络上传输的不透明字节串，账本状态机中实现的IBC路由模块负责对其处理。在一些实现中，数据报可以是于账本的交易或消息结构中的一个特定字段，并且可以包含其他信息（例如，防止垃圾消息的费用，防止重放的现时，路由到IBC处理程序所需要的类型标识符等）。 所有IBC子协议（例如，打开连接，创建通道，发送数据包）都是由一组数据报和协议来定义的，以便于通过路由模块处理它们。
 
 ### 连接
 
-A *connection* is a set of persistent data structures on two chains that contain information about the consensus state of the other ledger in the connection. Updates to the consensus state of one chain changes the state of the connection object on the other chain.
+*连接*是两个链上的一组持久化的数据结构，其中包含连接中关于另一个账本的共识状态信息。更新一个链的共识状态会改变对应的另一个链上的连接对象的状态。
 
-### Channel
+### 通道
 
-A *channel* is a set of persistent data structures on two chains that contain metadata to facilitate packet ordering, exactly-once delivery, and replay prevention. Packets sent through a channel change its internal state. Channels are associated with connections in a many-to-one relationship — a single connection can have any number of associated channels, and all channels must have a single associated connection, which must have been created prior to the creation of the channel.
+*通道*是两条链上的一组持久化的数据结构，其中包含方便数据包排序，仅一次送达和防止重放所需的元数据。通过通道发送数据包会更改其内部状态。通道与连接具有多对一关系，也就是说，单个连接可以具有任意数量的关联通道，并且所有通道必须具有单个关联连接，该关联连接必须在创建通道之前创建。
 
-### Packet
+### 数据包
 
-A *packet* is a particular data structure with sequence-related metadata (defined by the IBC specification) and an opaque value field referred to as the packet *data* (with semantics defined by the application layer, e.g. token amount and denomination). Packets are sent through a particular channel (and by extension, through a particular connection).
+*数据包*是一种特定的数据结构，它包含与序列相关的元数据（由IBC规范定义）和被称为数据包*数据* （具有由应用层定义的语义，例如通证数量和面额）的不透明数据段。数据包通过特定的通道发送（进一步说，通过特定的连接发送）。
 
-### Module
+### 模块
 
-A *module* is a sub-component of the state machine of a particular blockchain which may interact with the IBC handler and alter state according to the *data* field of particular IBC packets sent or received (minting or burning tokens, for example).
+*模块*是特定区块链状态机的一个子组件，可以与IBC处理程序交互并根据发送或接收的特定IBC数据包的*数据*字段更改状态（例如，铸造或销毁通证）。
 
 ### 握手
 
-A *handshake* is a particular class of sub-protocol involving multiple datagrams, generally used to initialise some common state on the two involved chains such as trusted states for each others' consensus algorithms.
+*握手*是一类涉及多种数据报的子协议，通常用于初始化两个链上的某些公共状态，例如彼此共识算法的信任状态。
 
 ### 子协议
 
-Sub-protocols are defined as a set of datagram kinds and functions which must be implemented by the IBC handler module of the implementing blockchain.
+子协议定义了一组数据报类型和函数，IBC处理模块必须实现这组定义来实现区块链。
 
-Datagrams must be relayed between chains by an external relayer process. This relayer process is assumed to behave in an arbitrary manner — no safety properties are dependent on its behaviour, although progress is generally dependent on the existence of at least one correct relayer process.
+数据报必须通过外部中继器进程在链之间进行中继。中继器进程可以以任意方式运行-安全保证不应受其行为的影响，尽管整个流程通常需要存在至少一个忠实的中继器进程。
 
-IBC sub-protocols are reasoned about as interactions between two chains `A` and `B` — there is no prior distinction between these two chains and they are assumed to be executing the same, correct IBC protocol. `A` is simply by convention the chain which goes first in the sub-protocol and `B` the chain which goes second. Protocol definitions should generally avoid including `A` and `B` in variable names to avoid confusion (as the chains themselves do not know whether they are `A` or `B` in the protocol).
+IBC子协议理应是在两条链`A`和`B`之间交互-这两条链之间没有先验区别，并且假定它们正在执行相同的，正确的IBC协议。`A`通常是在子协议过程中先行的那条链，而`B`次之。定义协议时通常应避免在变量名中包含`A`和`B`以避免混淆（因为链本身不知道它们在协议中是`A`还是`B` ）。
 
-### Authentication
+### 身份认证
 
-*Authentication* is the property of ensuring that datagrams were in fact sent by a particular chain in the manner defined by the IBC handler.
+*身份认证*是一个属性，用来确保数据报实际上是由特定链以IBC处理模块定义的方式发送的。
 
 ## 属性定义
 
-### Finality
+### 最终性
 
-*Finality* is the quantifiable assurance provided by a consensus algorithm that a particular block will not be reverted, subject to certain assumptions about the behaviour of the validator set. The IBC protocol requires finality, although it need not be absolute (for example, a threshold finality gadget for a Nakamoto consensus algorithm will provide finality subject to economic assumptions about how miners behave).
+*最终性*是由共识算法提供的可量化保证，即处于某种验证人集的特定假设下，特定区块不会回滚。 IBC协议需要最终性，尽管它不一定是绝对的（例如，一种针对中本聪共识算法的阈值最终性小工具，可以根据矿工行为的经济假设提供最终性）。
 
-### Misbehaviour
+### 不良行为
 
-*Misbehaviour* is a class of consensus fault defined by a consensus algorithm & detectable (possibly also attributable) by the light client of that consensus algorithm.
+*不良行为*是由共识算法定义的一类共识错误，并可由该共识算法的轻客户端检测（也可能是引发）。
 
-### Equivocation
+### 歧义错误
 
-*Equivocation* is a particular class of consensus fault committed by a validator or validators which sign votes on multiple different successors to a single block in an invalid manner.
-All equivocations are misbehaviours.
+*歧义错误*是一类特殊的共识错误，它由一个或多个验证人以非法的方式对单个块的多个不同后继块进行了投票造成。
+所有的歧义错误都属于不良行为。
 
-### Data availability
+### 数据可用性
 
-*Data availability* is the ability of off-chain relayer processes to retrieve data in the state of a machine within some time bound.
+*数据可用性*是指链下中继器进程在一定时间范围内可以从机器中获取状态数据的能力。
 
-### Data confidentiality
+### 数据保密性
 
-*Data confidentiality* is the ability of the host state machine to refuse to make particular data available to particular parties without impairing the functionality of the IBC protocol.
+*数据保密性*是主机状态机可以拒绝向特定方提供特定数据而不损害IBC协议功能的能力。
 
 ### 不可否认性
 
-*Non-repudiability* is the inability of a machine to successfully dispute having sent a particular packet or committed a particular state. IBC is a non-repudiable protocol, modulo data confidentiality choices made by state machines.
+*不可否认性*是指机器无法对已发送的特定数据包或提交的特定状态成功的进行质疑。 IBC抛开状态机在数据机密性的让步属于不可否认的协议。
 
-### Consensus liveness
+### 共识活性
 
-*Consensus liveness* is the continuance of block production by the consensus algorithm of a particular machine.
+*共识活性*是指特定机器在共识算法下可以持续的产生区块。
 
-### Transactional liveness
+### 交易活性
 
-*Transactional liveness* is the continued confirmation of incoming transactions (which transactions should be clear by context) by the consensus algorithm of a particular machine. Transactional liveness requires consensus liveness, but consensus liveness does not necessarily provide transactional liveness. Transactional liveness implies censorship resistance.
+*交易活性*是指特定机器在共识算法下对传入交易（该交易应根据上下文明确）可以持续确认。交易活性依赖共识活性，但是共识活性不一定能提供交易活性。并且交易活性意味着抗审查能力。
 
-### Bounded consensus liveness
+### 有界共识活性
 
-*Bounded consensus liveness* is consensus liveness within a particular bound.
+*有界共识活性*是指在特定范围内拥有共识活性。
 
-### Bounded transactional liveness
+### 有界交易活性
 
-*Bounded transactional liveness* is transactional liveness within a particular bound.
+*有界交易活性*是指在特定范围内拥有交易活性。
 
-### Exactly-once safety
+### 仅一次保证
 
-*Exactly-once safety* is the property that a packet is confirmed no more than once (and generally exactly-once assuming eventual transactional liveness).
+*仅一次保证*是指一个数据包仅确认不超过一次（通常仅一次保证意味着最终交易活性）。
 
-### Deliver-or-timeout safety
+### 送达或超时保证
 
-*Deliver-or-timeout safety* is the property that a packet will either be delivered & executed or will timeout in a way that can be proved back to the sender.
+*送达或超时保证*是指数据包或者被送达并执行，或者以给发件人回传响应的方式超时。
 
-### Constant (w.r.t. complexity)
+### 常量（复杂度）
 
-*Constant*, when referring to space or time complexity, means `O(1)`.
+*常量*, 是在空间或时间复杂度中使用的概念，其含义是`O(1)`.
 
 ### 简洁的
 
-*Succinct*, when referring to space or time complexity, means `O(poly(log n))` or better.
+*简洁的* ，是在空间或时间复杂度中使用的概念，其含义是`O(poly(log n))`或更优。
